@@ -47,6 +47,7 @@ local opts = {
 		relativenumber = false,
 		foldenable = false,
 		list = false,
+		winbar = "",
 	},
 }
 
@@ -248,9 +249,9 @@ function M.off()
 	if fn.filereadable(fn.expand("%:p")) == 1 then
 		pcall(function () pcall(cmd("q")) end)
 	end
-    
+
 	require("true-zen.minimalist").off()
-	
+
     for k, v in pairs(original_opts) do
 		if k ~= "highlights" then
 			o[k] = v
