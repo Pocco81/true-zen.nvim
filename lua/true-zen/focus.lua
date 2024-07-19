@@ -1,6 +1,7 @@
 local M = {}
 
 M.running = false
+M.prev_tabno = nil
 local cmd = vim.cmd
 local data = require("true-zen.utils.data")
 local echo = require("true-zen.utils.echo")
@@ -12,6 +13,7 @@ function M.on()
 		echo("there is only one window open", "error")
 		return
 	end
+	M.prev_tabno = vim.fn.tabpagenr()
 	cmd("tab split")
 	M.running = true
 
@@ -22,6 +24,9 @@ function M.off()
 	data.do_callback("focus", "close", "pre")
 
 	cmd("tabclose")
+	if M.prev_tabno ~= nil then
+		vim.api.nvim_feedkeys(M.prev_tabno .. "gt", 'n', true)
+	end
 	M.running = false
 
 	data.do_callback("focus", "close", "pos")
