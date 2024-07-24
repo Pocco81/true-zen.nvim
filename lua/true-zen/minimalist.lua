@@ -56,7 +56,17 @@ local function save_opts()
 	-- get the options from suitable_window
 	for user_opt, val in pairs(cnf.modes.minimalist.options) do
 		local opt = fn.gettabwinvar(currtab, suitable_window, "&" .. user_opt)
-		original_opts[user_opt] = (type(opt) == "number" and (opt == 1 and true or false) or opt)
+		if
+			type(opt) == "string"
+			or user_opt == "showtabline"
+			or user_opt == "cmdheight"
+			or user_opt == "laststatus"
+			or user_opt == "numberwidth"
+		then
+			original_opts[user_opt] = opt
+		else
+			original_opts[user_opt] = opt == 1
+		end
 		o[user_opt] = val
 	end
 
