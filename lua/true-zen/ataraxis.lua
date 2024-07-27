@@ -85,6 +85,7 @@ local function pad_win(new, props, move)
 
 	w.tz_pad_win = true
 
+	vim.cmd("set filetype=true_zen_padding_window")
 	cmd(move)
 	return win_id
 end
@@ -248,9 +249,9 @@ function M.off()
 	if fn.filereadable(fn.expand("%:p")) == 1 then
 		pcall(function () pcall(cmd("q")) end)
 	end
-    
+
 	require("true-zen.minimalist").off()
-	
+
     for k, v in pairs(original_opts) do
 		if k ~= "highlights" then
 			o[k] = v
