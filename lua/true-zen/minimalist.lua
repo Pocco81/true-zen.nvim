@@ -42,10 +42,10 @@ end
 local function save_opts()
 	-- check if current window's buffer type matches any of IGNORED_BUF_TYPES, if so look for one that doesn't
 	local suitable_window = fn.winnr()
-	local currtab = fn.tabpagenr()
-	if IGNORED_BUF_TYPES[fn.gettabwinvar(currtab, suitable_window, "&buftype")] ~= nil then
+	local current_tab = fn.tabpagenr()
+	if IGNORED_BUF_TYPES[fn.gettabwinvar(current_tab, suitable_window, "&buftype")] ~= nil then
 		for i = 1, fn.winnr("$") do
-			if IGNORED_BUF_TYPES[fn.gettabwinvar(currtab, i, "&buftype")] == nil then
+			if IGNORED_BUF_TYPES[fn.gettabwinvar(current_tab, i, "&buftype")] == nil then
 				suitable_window = i
 				goto continue
 			end
@@ -55,8 +55,8 @@ local function save_opts()
 
 	-- get the options from suitable_window
 	for user_opt, val in pairs(cnf.modes.minimalist.options) do
-		local opt = fn.gettabwinvar(currtab, suitable_window, "&" .. user_opt)
-		original_opts[user_opt] = (type(opt) == "number" and (opt == 1 and true or false) or opt)
+		local original_value = fn.gettabwinvar(current_tab, suitable_window, "&" .. user_opt)
+		original_opts[user_opt] = original_value
 		o[user_opt] = val
 	end
 
@@ -113,9 +113,18 @@ function M.off()
 	original_opts.number = nil
 	original_opts.relativenumber = nil
 
-	for k, v in pairs(original_opts) do
-		if k ~= "highlights" then
-			o[k] = v
+	for original_opt_key, original_opt_value in pairs(original_opts) do
+		if original_opt_key ~= "highlights" then
+			if not pcall(vim.cmd, "set " .. original_opt_key .. "=" .. original_opt_value) then
+				-- If vim.cmd throws an error it's probably a "1" that represents a boolean value
+				-- Then we must use "set $OPTION_NAME" or "set no$OPTION_NAME"
+				-- For example for showmode we do "set showmode" or "set noshowmode"
+				if original_opt_value == 1 then
+					vim.cmd("set " .. original_opt_key)
+				else
+					vim.cmd("set no" .. original_opt_key)
+				end
+			end
 		end
 	end
 
